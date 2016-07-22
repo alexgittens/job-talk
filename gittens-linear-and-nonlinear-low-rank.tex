@@ -1265,8 +1265,8 @@ where $q \in \mathbb{R}^{+}$ and $r \in \mathbb{N}_{0}$
     
     \item \textcolor{red}{Our contributions:}
         \begin{enumerate}
-            \item \textcolor{red}{A scheme to generate more efficient random features}
             \item\textcolor{red}{A much refined analysis of the Kar--Karnick RFM}
+            \item \textcolor{red}{A scheme to generate more efficient random features}
         \end{enumerate}
 \end{itemize}
 
@@ -1785,7 +1785,7 @@ Results from training language models using 640-dimensional word vectors on a 32
   \[
     p( c | w_1, \ldots, w_m) = \Gamma_c \prod_{i=1}^m p(c | w_i)
   \]
-  and the operation that gives compositionality nonlinear.
+  and the operation that gives compositionality is nonlinear.
 
   \begin{block}{Nonlinear compositionality \refer{G et al. 2016}}
   Given words $w_1, \ldots, w_m$, the word that minimizes 
@@ -1864,11 +1864,12 @@ Results from training language models using 640-dimensional word vectors on a 32
   \refer{Globerson et al. 2003} shows that the SDR model performs well at text categorization and information retrieval, but fitting an SDR model is expensive. 
   After each update to $\mathbf{U}, \mathbf{V}$, the normalizer $z_e = \sum_{ij} \mathrm{e}^{\mathbf{UV}^T}$ must be recalculated.
   \vskip1em
-  This suggests fitting Word2Vec-like models instead, which only compute row-wise normalization constants. 
+
+  This suggests fitting Word2Vec-like models with SGD-like algorithms instead, as Word2Vec only needs to recompute row-wise normalization constants. 
 \end{frame}
 
-\begin{frame}{Multi-label classification}
-\end{frame}
+%\begin{frame}{Multi-label classification}
+%\end{frame}
 
 \section{NLA in Spark}
 \begin{frame}
@@ -1884,11 +1885,9 @@ Results from training language models using 640-dimensional word vectors on a 32
 \includegraphics[width=.5\textwidth]{figures/spark/NERSC_usage}
 \includegraphics[width=.5\textwidth]{figures/spark/bdas-stack.jpg}
 \end{center}
-I am interested in adding linear algebra++ algorithms to the Berkeley Data Analytics Stack.
+At the AMPLab, we are interested in adding linear algebra++ algorithms to the Berkeley Data Analytics Stack.
 \vskip1em
-Collaborators at NERSC are investigating Spark as a unified platform for data analytics pipelines with diverse scientific inputs.
-\vskip1em
-Collaborators at Cray, Inc. are interested in Spark because of market demand, want to understand performance concerns.
+Our collaborators at NERSC are investigating Spark as a unified platform for data analytics pipelines with diverse scientific inputs.
 \end{frame}
 
 \begin{frame}
@@ -1924,9 +1923,9 @@ Collaborators at Cray, Inc. are interested in Spark because of market demand, wa
 
 \begin{frame}{Our Goals}
   \begin{itemize}
-    \item \redemphasis{Provide implementations} of low-rank factorizations (PCA, NMF, and randomized CX) in Spark
+    \item \redemphasis{Provide implementations} of low-rank factorizations (PCA and NMF) in Spark
     \item Successfully apply low-rank matrix factorizations to \redemphasis{TB-scale scientific datasets} in Spark
-    \item Understand \redemphasis{Spark performance on commodity clusters vs HPC platforms}
+%    \item Understand \redemphasis{Spark performance on commodity clusters vs HPC platforms}
     \item \redemphasis{Quantify the gaps} between highly-tuned C+MPI and Spark implementations
     \item \redemphasis{Investigate the scalability} of Spark for linear algebra on HPC platforms
   \end{itemize}
@@ -1948,6 +1947,8 @@ Atmosphere           & HDF5/1       & $26,542,080 \times 81,600$           & 16T
   \textcolor{dgreen}{Daya Bay} --- neutrino sensor array measurements; used for NMF
 \vskip1em
   \textcolor{dgreen}{Ocean and Atmosphere} --- climate variables (ocean temperature, atmospheric humidity) measured on a 3D grid at 3 or 6 hour intervals over about 30 years; used for PCA
+  \vskip1em
+  These datasets are tall and skinny, so 1D partitioning makes sense and fits nicely into Spark's RDD formalism.
 \end{frame}
 
 \begin{frame}{Running times}
@@ -2008,7 +2009,7 @@ contain the corresponding singular vectors.
 \vskip1em
 We use the following algorithm to compute $\mathbf{A}_k$ when $\mathbf{A}$ is tall and skinny:
  \begin{enumerate}
-   \item Compute $\mathbf{V}_k$ as the top $k$ eigenvectors of $\mathbf{A}^T \mathbf{A}$ using a Lanczos eigensolver with distributed matrix-vector multiplies. 
+   \item Compute $\mathbf{V}_k$ as the top $k$ eigenvectors of $\mathbf{A}^T \mathbf{A}$ using a Lanczos eigensolver (ARPACK) with multiple rounds of distributed matrix-vector multiplies. 
    \item Compute $\mathbf{A V}_k$ and collect on the driver.
    \item On the driver, compute the SVD of $\mathbf{A V}_k$ to get $\mathbf{U}_k$ and $\bm{\Sigma}_k.$
  \end{enumerate}
